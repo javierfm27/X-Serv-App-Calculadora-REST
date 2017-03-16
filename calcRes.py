@@ -20,12 +20,12 @@ class calcRestApp (webapp.webApp):
         try:
             request = request.decode('utf-8')
             recurso = request.split()[1][1:]
-            recurso, operacion = recurso.split("/")
+            recurso, operacion = recurso.split("/",1)
         except IndexError:
-            return("","")
+            recurso, operacion = ""
         except ValueError:
             recurso = request.split()[1][1:]
-            return(recurso,"")
+            operacion = ""
         return recurso, operacion
 
     def process(self, parsedRequest):
@@ -47,12 +47,15 @@ class calcRestApp (webapp.webApp):
                 elif op == "*":
                     self.result = int(num1) * int(num2)
                 elif op == "/":
-                    self.result = int(num1) / int(num2)
-                bodyHtml = "Operacion Recibida " + num1 + " " + op + " " + num2
-                httpCode = "200 Ok"
-            else:
-                bodyHtml = "Error 400! Debe introducir los datos de la operacion"
-                httpCode = "400 Bad Request"
+                    try:
+                        self.result = int(num1) / int(num2)
+                        bodyHtml = "Operacion Recibida " + num1 + " " + op + " " + num2
+                    except ZeroDivisionError:
+                        bodyHtml = "ERROR en la division, intentado dividir por cero"
+                    httpCode = "200 Ok"
+                else:
+                    bodyHtml = "Error 400! Debe introducir los datos de la operacion"
+                    httpCode = "400 Bad Request"
         elif recurso == "":
             bodyHtml = "Para usar la calculadora introduce <br>" \
                     + "-->'/operacion/numero1,operacion,numero2'<br>" \
